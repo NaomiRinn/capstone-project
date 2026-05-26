@@ -1,0 +1,15 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-dotenv>=1.0.1
+python-multipart>=0.0.9
+supabase>=2.4.0,<2.10.0
+pillow>=10.3.0
+numpy>=2.0.0
+pydantic[email]>=2.7.0
+requests>=2.31.0
+
+# ── TensorFlow (opsional) ──────────────────────────────────────────────────
+# TensorFlow belum memiliki wheel resmi untuk Python 3.14.
+# Jika menggunakan Python 3.10–3.12, jalankan:
+#   pip install tensorflow==2.17.0
+# Tanpa TF, server otomatis menggunakan Mock Predictor.
