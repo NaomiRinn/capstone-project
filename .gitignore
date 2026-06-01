@@ -5,6 +5,13 @@ backend/node_modules/
 backend/venv/
 backend/.venv/
 
+# Python build artifacts
+__pycache__/
+*.pyc
+
+# Aset model mentah (sudah diekstrak ke backend/app/models/)
+AI/*.zip
+
 # Production builds
 frontend/dist/
 dist/
