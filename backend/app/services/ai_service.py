@@ -4,6 +4,7 @@ ai_service.py — AUVRA Skin Classifier Service
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import os
 import random
@@ -21,21 +22,23 @@ logger = logging.getLogger(__name__)
 # ─── Paths ────────────────────────────────────────────────────────────────────
 _BASE_DIR = Path(__file__).resolve().parent.parent           # backend/app
 _MODEL_DIR = _BASE_DIR / "models"
-_MODEL_PATH = _MODEL_DIR / "skin_classifier.keras"
-_CLASSES_PATH = _MODEL_DIR / "jumlah_kelas.txt"
+_MODEL_PATH = _MODEL_DIR / "model_auvra_final.keras"          # model baru (MobileNetV3Large)
+_CLASSES_PATH = _MODEL_DIR / "class_names.json"               # sumber kebenaran urutan kelas
 
-# ─── Default class names (fallback jika jumlah_kelas.txt tidak ada) ───────────
+# ─── Default class names (fallback jika class_names.json tidak ada) ───────────
+# PENTING: urutan WAJIB sama persis dengan urutan output model saat training.
+# Sumber: class_names.json yang dibundel bersama model_auvra_final.keras.
 _DEFAULT_CLASSES = [
     "Basal Cell Carcinoma (BCC)",
-    "Eczema",
-    "Hyperpigmentation",
-    "Kulit Sehat",
+    "Benign Keratosis-like Lesions (BKL)",
     "Melanoma",
     "Melasma",
-    "Psoriasis",
+    "Psoriasis pictures Lichen Planus and related diseases",
     "Seborrheic Keratoses and other Benign Tumors",
     "Solar Lentigo",
     "Sunburn",
+    "healthy skin",
+    "hyperpigmentation",
 ]
 
 # ─── Recommendation templates per condition ───────────────────────────────────
@@ -84,6 +87,19 @@ _RECOMMENDATIONS: dict[str, list[dict]] = {
         {"type": "diagnostic", "title": "Pemeriksaan Dokter", "description": "Periksakan ke dokter kulit untuk memastikan lesi bersifat jinak dan bukan keganasan.", "priority": 1},
         {"type": "lifestyle", "title": "Jangan Menggaruk Lesi", "description": "Hindari menggaruk atau mencabuti benjolan agar tidak memicu infeksi sekunder.", "priority": 2},
     ],
+    # ── Kelas tambahan model baru ──────────────────────────────────────────────
+    "healthy skin": [
+        {"type": "natural", "title": "Tabir Surya Harian", "description": "Gunakan tabir surya SPF 30+ setiap pagi untuk menjaga kesehatan kulit.", "priority": 1},
+        {"type": "lifestyle", "title": "Hidrasi yang Cukup", "description": "Minum minimal 8 gelas air sehari untuk menjaga kelembapan alami kulit.", "priority": 2},
+    ],
+    "Benign Keratosis-like Lesions (BKL)": [
+        {"type": "diagnostic", "title": "Pemeriksaan Dermatologi", "description": "Periksakan lesi ke dokter kulit untuk memastikan sifatnya jinak melalui dermoskopi.", "priority": 1},
+        {"type": "lifestyle", "title": "Pantau Perubahan Bentuk", "description": "Perhatikan perubahan ukuran, warna, atau bentuk lesi dan catat bila ada.", "priority": 2},
+    ],
+    "Psoriasis pictures Lichen Planus and related diseases": [
+        {"type": "natural", "title": "Pelembab Berbasis Salep", "description": "Gunakan pelembab tebal secara rutin untuk meredakan kulit bersisik dan gatal.", "priority": 1},
+        {"type": "diagnostic", "title": "Konsultasi Spesialis Kulit", "description": "Diskusikan opsi terapi topikal atau fototerapi dengan dokter spesialis kulit.", "priority": 2},
+    ],
 }
 
 # Fallback rekomendasi umum
@@ -108,10 +124,14 @@ class SkinClassifierService:
 
     def _load_class_names(self) -> List[str]:
         if _CLASSES_PATH.exists():
-            names = [ln.strip() for ln in _CLASSES_PATH.read_text(encoding="utf-8").splitlines() if ln.strip()]
-            if names:
-                logger.info("[AI Service] Loaded %d class names from jumlah_kelas.txt", len(names))
-                return names
+            try:
+                names = json.loads(_CLASSES_PATH.read_text(encoding="utf-8"))
+                names = [str(n).strip() for n in names if str(n).strip()]
+                if names:
+                    logger.info("[AI Service] Loaded %d class names from class_names.json", len(names))
+                    return names
+            except (json.JSONDecodeError, TypeError) as exc:
+                logger.error("[AI Service] Failed to parse class_names.json (%s). Using defaults.", exc)
         return _DEFAULT_CLASSES
 
     def _try_load_model(self) -> None:
@@ -120,32 +140,15 @@ class SkinClassifierService:
             logger.error("[AI Service] Model file not found at %s. Using mock.", _MODEL_PATH)
             return
         try:
-            import tensorflow as tf  # noqa: PLC0415
             import keras  # noqa: PLC0415
 
-            # ── Monkey Patching Keras Dense Layer Global ──────────────────────
-            # Memotong properti 'quantization_config' langsung dari akar constructor Keras
-            _old_dense_init = keras.layers.Dense.__init__
+            # Model baru (AUVRA_MobileNetV3) tersimpan dengan Keras 3.13+ dan dapat dimuat
+            # langsung tanpa monkey-patch / custom_objects — arsitekturnya bersih.
+            self.model = keras.models.load_model(str(_MODEL_PATH))
 
-            def _patched_dense_init(self_layer, *args, **kwargs):
-                kwargs.pop('quantization_config', None)  # Buap parameter pemicu eror deserialisasi
-                _old_dense_init(self_layer, *args, **kwargs)
-
-            keras.layers.Dense.__init__ = _patched_dense_init
-            # ──────────────────────────────────────────────────────────────────
-
-            # Fungsi pembungkus jika arsitektur membutuhkan registrasi token fungsional
-            def hard_silu(x):
-                return keras.activations.hard_silu(x)
-
-            # Muat model secara bersih menggunakan native keras loader
-            self.model = keras.models.load_model(
-                str(_MODEL_PATH),
-                custom_objects={"hard_silu": hard_silu}
-            )
-                
             self.mode = "tensorflow"
             logger.info("[AI Service] TensorFlow model loaded successfully from %s", _MODEL_PATH)
+            logger.info("[AI Service] Classes (%d): %s", len(self.class_names), self.class_names)
         except ImportError as imp_err:
             self.mode = "mock"
             logger.error("[AI Service] Required packages not fully installed: %s", imp_err)
@@ -182,10 +185,11 @@ class SkinClassifierService:
 
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         img = img.resize((224, 224))
-        
-        # Normalisasi matriks piksel (0.0 - 1.0) untuk keakuratan model CNN
-        arr = np.array(img, dtype=np.float32) / 255.0
-        arr = np.expand_dims(arr, axis=0)
+
+        # PENTING: model MobileNetV3Large SUDAH menyertakan layer preprocessing
+        # (Rescaling/Normalization) di dalam arsitekturnya. Jadi kirim piksel MENTAH
+        # (0-255) — JANGAN dibagi 255. Membagi 255 di sini = normalisasi ganda → prediksi ngawur.
+        arr = np.expand_dims(np.array(img, dtype=np.float32), axis=0)
 
         preds = self.model.predict(arr, verbose=0)[0]
         return self._build_result(preds)
@@ -226,14 +230,23 @@ class SkinClassifierService:
 
     @staticmethod
     def _class_to_severity(condition: str) -> str:
+        # Pemetaan severity untuk 10 kelas model baru (AUVRA_MobileNetV3).
         cond = condition.strip().lower()
-        if cond in ("kulit sehat", "normal"):
+        if cond in ("healthy skin", "kulit sehat", "normal"):
             return "normal"
-        elif cond in ("hyperpigmentation", "eczema", "solar lentigo"):
+        elif cond in ("hyperpigmentation", "solar lentigo", "sunburn"):
             return "mild"
-        elif cond in ("melasma", "sunburn", "psoriasis"):
+        elif cond in (
+            "melasma",
+            "benign keratosis-like lesions (bkl)",
+            "seborrheic keratoses and other benign tumors",
+        ):
             return "moderate"
-        elif cond in ("basal cell carcinoma (bcc)", "melanoma", "seborrheic keratoses and other benign tumors"):
+        elif cond in (
+            "basal cell carcinoma (bcc)",
+            "melanoma",
+            "psoriasis pictures lichen planus and related diseases",
+        ):
             return "severe"
         return "normal"
 
@@ -261,8 +274,12 @@ class SkinClassifierService:
             }
         ]
 
+    # Lookup rekomendasi case-insensitive: label model baru bisa berbeda kapitalisasi
+    # (mis. "hyperpigmentation" vs kunci "Hyperpigmentation"). Dibangun sekali saat import.
+    _RECOMMENDATIONS_CI = {k.lower(): v for k, v in _RECOMMENDATIONS.items()}
+
     def _build_recommendations(self, condition: str, severity: str) -> list:
-        templates = _RECOMMENDATIONS.get(condition, _DEFAULT_RECOMMENDATIONS)
+        templates = self._RECOMMENDATIONS_CI.get(condition.strip().lower(), _DEFAULT_RECOMMENDATIONS)
         recs = []
         for i, tmpl in enumerate(templates):
             recs.append({

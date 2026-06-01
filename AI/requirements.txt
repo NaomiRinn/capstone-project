@@ -1,0 +1,8 @@
+tensorflow==2.19.0
+fastapi==0.136.1
+uvicorn==0.47.0
+python-multipart==0.0.29
+pillow==11.3.0
+numpy==2.0.2
+google-genai==1.68.0
+pydantic==2.12.3
