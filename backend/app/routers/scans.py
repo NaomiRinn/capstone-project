@@ -145,15 +145,13 @@ async def upload_scan(
         ext = _ext_from_content_type(image.content_type or "")
         storage_path = f"{scan_id}/original.{ext}"
         
-        # Pindahkan ke sini agar objek 'options' siap sebelum digunakan
-        from storage3.types import FileOptions # Pastikan di-import (bisa di top-level file)
-        options = FileOptions()
-        options.content_type = image.content_type or "image/jpeg"
+        # storage3 >= 2.x: FileOptions adalah TypedDict, isi sebagai dict.
+        options: FileOptions = {"content-type": image.content_type or "image/jpeg"}
 
-        db.storage.from_("scans").upload(
+        db.storage.from_(STORAGE_BUCKET).upload(
             path=storage_path,
             file=image_bytes,
-            file_options=options # Sekarang aman digunakan!
+            file_options=options,
         )
         
         public_url = db.storage.from_(STORAGE_BUCKET).get_public_url(storage_path)
