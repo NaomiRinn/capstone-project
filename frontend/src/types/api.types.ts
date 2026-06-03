@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ─── Shared ────────────────────────────────────────────────────────────────
-export const SeveritySchema = z.enum(['mild', 'moderate', 'severe']);
+export const SeveritySchema = z.enum(['normal', 'mild', 'moderate', 'severe']);
 export type Severity = z.infer<typeof SeveritySchema>;
 
 export const ScanStatusSchema = z.enum(['pending', 'processing', 'completed', 'failed']);

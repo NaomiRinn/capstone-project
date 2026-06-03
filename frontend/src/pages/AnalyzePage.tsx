@@ -192,12 +192,7 @@ export function AnalyzePage() {
 
           {phase === 'results' && result && (
             <div className="animate-fade-in">
-              <ResultsDashboard result={result} imagePreview={imagePreview} />
-              <div className="mt-6 flex justify-center">
-                <button onClick={handleReset} className="text-label-md text-primary hover:underline transition-colors">
-                  ← Analisis Gambar Lain
-                </button>
-              </div>
+              <ResultsDashboard result={result} imagePreview={imagePreview} onReset={handleReset} />
             </div>
           )}
 
