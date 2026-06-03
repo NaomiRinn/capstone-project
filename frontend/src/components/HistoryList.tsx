@@ -45,11 +45,19 @@ export function HistoryList() {
     const controller = new AbortController();
 
     listScans(controller.signal)
-      .then(setScans)
-      .catch((err) => {
-        if (err.name !== 'AbortError') setError('Gagal memuat riwayat analisis.');
+      .then((data) => {
+        setScans(data);
+        setLoading(false);
       })
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        import('axios').then(({ default: axios }) => {
+          if (!axios.isCancel(err) && err.name !== 'AbortError' && err.name !== 'CanceledError') {
+            const msg = err.response?.data?.message || err.message || 'Gagal memuat riwayat analisis.';
+            setError(`Error: ${msg}`);
+            setLoading(false);
+          }
+        });
+      });
 
     return () => controller.abort();
   }, []);
