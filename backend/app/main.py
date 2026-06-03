@@ -31,12 +31,7 @@ app = FastAPI(
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",   # Vite dev server
-        "http://localhost:4173",   # Vite preview
-        "http://127.0.0.1:5173",
-        "https://auvra.io",        # production (opsional)
-    ],
+    allow_origins=["*"], # Mengizinkan semua domain (Vercel, localhost, dll)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
