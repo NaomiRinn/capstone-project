@@ -29,8 +29,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Menyalin seluruh kode backend ke dalam container
 COPY . .
 
-# Mengekspos port 8000 agar bisa diakses dari luar
-EXPOSE 8000
+# Mengekspos port 7860 (Port standar yang diwajibkan oleh Hugging Face)
+EXPOSE 7860
 
-# Perintah untuk menjalankan FastAPI menggunakan Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Perintah untuk menjalankan FastAPI menggunakan Uvicorn di port 7860
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
