@@ -187,7 +187,7 @@ async def get_scan(scan_id: str):
 
 # ─── GET / ────────────────────────────────────────────────────────────────────
 
-@router.get("/", response_model=List[ScanListItem])
+@router.get("", response_model=List[ScanListItem])
 async def list_scans():
     db = get_supabase()
     response = (
