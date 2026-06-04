@@ -64,7 +64,7 @@ export function HomePage() {
               className="mb-8 inline-flex items-center gap-2 rounded-full glass px-5 py-2 shadow-sm"
             >
               <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-semibold text-primary tracking-wider uppercase">AI On-Device · Privasi Terjamin</span>
+              <span className="text-xs font-semibold text-primary tracking-wider uppercase">AI On-Device</span>
             </motion.div>
 
             {/* Headline */}
@@ -87,8 +87,7 @@ export function HomePage() {
               transition={{ delay: 0.2 }}
               className="text-lg text-on-surface-variant mb-10 max-w-xl leading-relaxed"
             >
-              AUVRA menggunakan model kecerdasan buatan canggih yang berjalan sepenuhnya di perangkat Anda —
-              tanpa upload, tanpa cloud, tanpa risiko privasi.
+              AUVRA menggunakan model kecerdasan buatan canggih yang berjalan sepenuhnya di perangkat Anda
             </motion.p>
 
             {/* CTAs */}

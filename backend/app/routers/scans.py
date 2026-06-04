@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Header
 from fastapi.responses import Response
 
 from app.database import get_supabase
@@ -114,6 +114,7 @@ async def _run_analysis(scan_id: str, image_bytes: bytes) -> None:
 async def upload_scan(
     background_tasks: BackgroundTasks,
     image: UploadFile = File(...),
+    x_client_id: str | None = Header(None),
 ):
     # 1. Validate content type
     if image.content_type not in ALLOWED_CONTENT_TYPES:
@@ -138,6 +139,7 @@ async def upload_scan(
     db = get_supabase()
     db.table("scans").insert(_to_snake_case({
         "id": scan_id,
+        "userId": x_client_id,
         "status": "processing",
         "createdAt": now,
         "updatedAt": now,
@@ -181,9 +183,12 @@ async def upload_scan(
 # ─── GET /{scan_id} ───────────────────────────────────────────────────────────
 
 @router.get("/{scan_id}", response_model=ScanResult)
-async def get_scan(scan_id: str):
+async def get_scan(scan_id: str, x_client_id: str | None = Header(None)):
     db = get_supabase()
-    response = db.table("scans").select("*").eq("id", scan_id).single().execute()
+    query = db.table("scans").select("*").eq("id", scan_id)
+    if x_client_id:
+        query = query.eq("user_id", x_client_id)
+    response = query.single().execute()
     if not response.data:
         raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not found.")
     return ScanResult(**_to_camel_case(response.data))
@@ -192,14 +197,12 @@ async def get_scan(scan_id: str):
 # ─── GET / ────────────────────────────────────────────────────────────────────
 
 @router.get("", response_model=List[ScanListItem])
-async def list_scans():
+async def list_scans(x_client_id: str | None = Header(None)):
     db = get_supabase()
-    response = (
-        db.table("scans")
-        .select("id,status,created_at,thumbnail_url,severity,overall_score")
-        .order("created_at", desc=True)
-        .execute()
-    )
+    query = db.table("scans").select("id,status,created_at,thumbnail_url,severity,overall_score")
+    if x_client_id:
+        query = query.eq("user_id", x_client_id)
+    response = query.order("created_at", desc=True).execute()
     camel_list = [_to_camel_case(row) for row in (response.data or [])]
     return [ScanListItem(**row) for row in camel_list]
 
@@ -207,11 +210,14 @@ async def list_scans():
 # ─── DELETE /{scan_id} ────────────────────────────────────────────────────────
 
 @router.delete("/{scan_id}", status_code=204)
-async def delete_scan(scan_id: str):
+async def delete_scan(scan_id: str, x_client_id: str | None = Header(None)):
     db = get_supabase()
 
     # Verify exists first
-    check = db.table("scans").select("id").eq("id", scan_id).single().execute()
+    query = db.table("scans").select("id").eq("id", scan_id)
+    if x_client_id:
+        query = query.eq("user_id", x_client_id)
+    check = query.single().execute()
     if not check.data:
         raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not found.")
 

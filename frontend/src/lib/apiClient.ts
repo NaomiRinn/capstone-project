@@ -39,12 +39,26 @@ function createApiClient(): AxiosInstance {
     },
   });
 
-  // ── Request Interceptor: attach JWT token ────────────────────────────────
+  // ── Client ID Storage ────────────────────────────────────────────────────
+  const CLIENT_ID_KEY = 'auvra_client_id';
+  function getClientId(): string {
+    let id = localStorage.getItem(CLIENT_ID_KEY);
+    if (!id) {
+      id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'client-' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem(CLIENT_ID_KEY, id);
+    }
+    return id;
+  }
+
+  // ── Request Interceptor: attach JWT token and Client ID ──────────────────
   client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = tokenStorage.get();
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (config.headers) {
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        config.headers['X-Client-ID'] = getClientId();
       }
       return config;
     },
