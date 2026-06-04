@@ -13,7 +13,7 @@ import logging
 import os
 import uuid
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File
 from fastapi.responses import Response
@@ -49,14 +49,18 @@ _CAMEL_TO_SNAKE = {
 _SNAKE_TO_CAMEL = {v: k for k, v in _CAMEL_TO_SNAKE.items()}
 
 
-def _to_snake_case(data: dict) -> dict:
+def _to_snake_case(data: Any) -> dict:
+    if not isinstance(data, dict):
+        return data  # type: ignore
     return {
         _CAMEL_TO_SNAKE.get(k, k): v
         for k, v in data.items()
     }
 
 
-def _to_camel_case(data: dict) -> dict:
+def _to_camel_case(data: Any) -> dict:
+    if not isinstance(data, dict):
+        return data  # type: ignore
     return {
         _SNAKE_TO_CAMEL.get(k, k): v
         for k, v in data.items()
@@ -187,7 +191,7 @@ async def get_scan(scan_id: str):
 
 # ─── GET / ────────────────────────────────────────────────────────────────────
 
-@router.get("/", response_model=List[ScanListItem])
+@router.get("", response_model=List[ScanListItem])
 async def list_scans():
     db = get_supabase()
     response = (

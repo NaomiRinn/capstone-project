@@ -45,11 +45,19 @@ export function HistoryList() {
     const controller = new AbortController();
 
     listScans(controller.signal)
-      .then(setScans)
-      .catch((err) => {
-        if (err.name !== 'AbortError') setError('Gagal memuat riwayat analisis.');
+      .then((data) => {
+        setScans(data);
+        setLoading(false);
       })
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        import('axios').then(({ default: axios }) => {
+          if (!axios.isCancel(err) && err.name !== 'AbortError' && err.name !== 'CanceledError') {
+            const msg = err.response?.data?.message || err.message || 'Gagal memuat riwayat analisis.';
+            setError(`Error: ${msg}`);
+            setLoading(false);
+          }
+        });
+      });
 
     return () => controller.abort();
   }, []);
@@ -66,7 +74,7 @@ export function HistoryList() {
   return (
     <div className="space-y-4">
       {/* Search + Filter */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none" />
           <input

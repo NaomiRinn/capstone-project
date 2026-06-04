@@ -126,7 +126,7 @@ export function ResultsDashboard({ result, imagePreview, onReset }: ResultsDashb
           <h3 className="font-headline text-xl font-semibold text-on-surface mb-4">Analisis Kondisi Kulit</h3>
           <div className="divide-y divide-surface-container">
             {result.features.map((feat) => (
-              <div key={feat.name} className="flex justify-between items-center py-3 first:pt-0 last:pb-0">
+              <div key={feat.name} className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 first:pt-0 last:pb-0 gap-1 sm:gap-4">
                 <span className="text-sm font-medium text-on-surface-variant">{feat.name}</span>
                 <span className="text-sm font-bold text-on-surface">{feat.description}</span>
               </div>
