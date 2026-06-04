@@ -73,7 +73,7 @@ export function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="font-headline text-[clamp(38px,5.5vw,60px)] font-bold leading-[1.15] text-on-surface mb-6"
+              className="font-headline text-[clamp(32px,8vw,60px)] font-bold leading-[1.15] text-on-surface mb-6"
             >
               Analisis Kulit Presisi{' '}
               <span className="gradient-text-ai">Berbasis AI</span>{' '}
@@ -116,7 +116,7 @@ export function HomePage() {
 
             {/* Trust pills */}
             <div className="mt-10 flex flex-wrap justify-center gap-3 animate-fade-in delay-300">
-              {['🔒 Tanpa Upload', '⚡ Analisis < 2 Detik', '🌿 Rekomendasi Herbal', '📱 Mobile-Friendly'].map((tag) => (
+              {['🌿 Rekomendasi Herbal'].map((tag) => (
                 <span key={tag} className="rounded-full glass px-4 py-1.5 text-xs font-medium text-on-surface-variant shadow-sm">
                   {tag}
                 </span>
@@ -157,13 +157,9 @@ export function HomePage() {
             </div>
 
             {/* Floating glass badges */}
-            <div className="absolute -left-6 top-6 glass rounded-2xl px-4 py-2.5 shadow-glass animate-float">
+            <div className="hidden md:block absolute -left-6 top-6 glass rounded-2xl px-4 py-2.5 shadow-glass animate-float z-10">
               <p className="text-xs font-bold text-primary">🤖 AI On-Device</p>
               <p className="text-xs text-on-surface-variant">TensorFlow.js</p>
-            </div>
-            <div className="absolute -right-6 bottom-6 glass rounded-2xl px-4 py-2.5 shadow-glass animate-float delay-200">
-              <p className="text-xs font-bold text-tertiary">🔒 Enkripsi AES-GCM</p>
-              <p className="text-xs text-on-surface-variant">Web Crypto API</p>
             </div>
           </div>
         </div>

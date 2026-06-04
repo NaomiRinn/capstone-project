@@ -12,9 +12,9 @@ export function ConsentModal({ onAccept, onDecline }: ConsentModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="absolute inset-0 bg-on-surface/60 backdrop-blur-sm" />
-      <div className="relative w-full max-w-md glass rounded-2xl shadow-glass animate-scale-in">
+      <div className="relative w-full max-w-md max-h-[90vh] flex flex-col glass rounded-2xl shadow-glass animate-scale-in">
         {/* Header */}
-        <div className="p-6 border-b border-outline-variant/30">
+        <div className="p-6 border-b border-outline-variant/30 shrink-0">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
               <Shield className="h-6 w-6 text-primary" />
@@ -26,11 +26,11 @@ export function ConsentModal({ onAccept, onDecline }: ConsentModalProps) {
           </div>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto">
           {/* Privacy points */}
           {[
-            { icon: Lock, title: 'Privasi Terjamin', desc: 'Gambar kulit Anda diproses sepenuhnya di perangkat ini. Tidak ada data yang dikirim ke server kami.' },
-            { icon: Cpu, title: 'AI On-Device', desc: 'Model AI berjalan langsung di browser Anda menggunakan TensorFlow.js. Koneksi internet tidak diperlukan saat analisis.' },
+            { icon: Lock, title: 'Privasi Terjaga', desc: 'Riwayat dan hasil analisis terikat pada perangkat ini. Orang lain tidak dapat melihat hasil Anda.' },
+            { icon: Cpu, title: 'Analisis Cepat & Aman', desc: 'Gambar diproses menggunakan model AI dengan jalur komunikasi yang terenkripsi dan aman.' },
             { icon: Shield, title: 'Bukan Diagnosis Medis', desc: 'Hasil analisis bersifat indikatif. Kami sangat menyarankan konsultasi dengan dokter kulit untuk diagnosis akurat.' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="flex gap-3 rounded-xl bg-surface-container p-3">
