@@ -129,11 +129,11 @@ export function HomePage() {
           <div className="mt-16 relative max-w-2xl mx-auto animate-slide-up delay-300">
             <div className="relative overflow-hidden rounded-3xl bg-gradient-ai p-[2px] shadow-secondary">
               <div className="rounded-[22px] glass p-6 scan-overlay">
-                <div className="flex gap-5">
-                  <div className="w-36 h-36 shrink-0 rounded-2xl bg-linear-to-br from-surface-container to-surface-container-high flex items-center justify-center">
-                    <Activity className="h-14 w-14 text-primary/25" />
+                <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+                  <div className="w-24 h-24 sm:w-36 sm:h-36 shrink-0 rounded-2xl bg-linear-to-br from-surface-container to-surface-container-high flex items-center justify-center">
+                    <Activity className="h-10 w-10 sm:h-14 sm:w-14 text-primary/25" />
                   </div>
-                  <div className="flex-1 space-y-3 pt-1">
+                  <div className="flex-1 space-y-3 pt-1 w-full">
                     <div className="h-3.5 rounded-full bg-gradient-ai opacity-60 w-3/4" />
                     <div className="space-y-2.5">
                       {[70, 85, 45, 90].map((w, i) => (

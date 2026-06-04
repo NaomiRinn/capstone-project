@@ -168,8 +168,8 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
               </div>
 
               {/* Bottom CTA */}
-              <div className="p-4 flex items-center justify-between">
-                <div>
+              <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="text-center sm:text-left">
                   <p className="text-label-md font-semibold text-on-surface">{previewFile?.name}</p>
                   <p className="text-label-sm text-on-surface-variant">
                     {previewFile ? (previewFile.size / 1024).toFixed(1) + ' KB' : ''}
@@ -178,7 +178,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
                 <button
                   onClick={handleAnalyze}
                   disabled={disabled}
-                  className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-label-md font-semibold text-on-primary shadow-primary transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-label-md font-semibold text-on-primary shadow-primary transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
                 >
                   Analisis Sekarang
                 </button>
