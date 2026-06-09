@@ -12,13 +12,6 @@ const FEATURES = [
     glow: 'rgba(0,96,172,0.15)',
   },
   {
-    icon: Shield,
-    title: 'Privasi Mutlak',
-    description: 'Web Crypto API mengenkripsi semua data lokal. Privasi kulit Anda adalah hak yang tidak dapat dikompromikan.',
-    accent: 'bg-primary/10 text-primary',
-    glow: 'rgba(15,82,56,0.15)',
-  },
-  {
     icon: Leaf,
     title: 'Rekomendasi Herbal',
     description: 'Saran berbasis bahan alami yang dipersonalisasi berdasarkan kondisi kulit unik Anda.',
@@ -193,7 +186,7 @@ export function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {FEATURES.map(({ icon: Icon, title, description, accent, glow }) => (
               <div
                 key={title}
