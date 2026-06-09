@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Clock, ChevronRight, AlertCircle, BarChart2 } from 'lucide-react';
+import { Search, Filter, Clock, ChevronRight, AlertCircle, BarChart2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { listScans } from '@/services/scanService';
+import { listScans, deleteScan } from '@/services/scanService';
 import type { ScanListItem } from '@/types/api.types';
 
 const STATUS_PILLS: Record<string, { label: string; className: string }> = {
@@ -40,6 +40,24 @@ export function HistoryList() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm('Apakah Anda yakin ingin menghapus riwayat analisis ini?')) return;
+    
+    setIsDeleting(id);
+    try {
+      await deleteScan(id);
+      setScans((prev) => prev.filter((s) => s.id !== id));
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      alert(err.response?.data?.message || err.message || 'Gagal menghapus riwayat.');
+    } finally {
+      setIsDeleting(null);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,11 +179,19 @@ export function HistoryList() {
                   )}
                 </div>
 
-                {/* Status + Arrow */}
-                <div className="flex items-center gap-2">
+                {/* Status + Actions */}
+                <div className="flex items-center gap-1 sm:gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${pill.className}`}>
                     {pill.label}
                   </span>
+                  <button
+                    onClick={(e) => handleDelete(e, scan.id)}
+                    disabled={isDeleting === scan.id}
+                    className="p-1.5 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error transition-colors relative z-10 disabled:opacity-50"
+                    title="Hapus riwayat"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                   <ChevronRight className="h-4 w-4 text-outline transition-transform group-hover:translate-x-0.5" />
                 </div>
               </Link>

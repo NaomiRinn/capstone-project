@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Cpu, Lock } from 'lucide-react';
+import { Shield, Cpu } from 'lucide-react';
 
 interface ConsentModalProps {
   onAccept: () => void;
@@ -29,7 +29,6 @@ export function ConsentModal({ onAccept, onDecline }: ConsentModalProps) {
         <div className="p-6 space-y-4 overflow-y-auto">
           {/* Privacy points */}
           {[
-            { icon: Lock, title: 'Privasi Terjaga', desc: 'Riwayat dan hasil analisis terikat pada perangkat ini. Orang lain tidak dapat melihat hasil Anda.' },
             { icon: Cpu, title: 'Analisis Cepat & Aman', desc: 'Gambar diproses menggunakan model AI dengan jalur komunikasi yang terenkripsi dan aman.' },
             { icon: Shield, title: 'Bukan Diagnosis Medis', desc: 'Hasil analisis bersifat indikatif. Kami sangat menyarankan konsultasi dengan dokter kulit untuk diagnosis akurat.' },
           ].map(({ icon: Icon, title, desc }) => (
